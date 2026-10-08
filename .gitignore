@@ -1,0 +1,17 @@
+.venv/
+*.egg-info/
+build/
+dist/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local PhysioNet data and generated model artifacts are not committed.
+physionet_data/
+artifacts/
+*.joblib
+*.ubj
+
+.env

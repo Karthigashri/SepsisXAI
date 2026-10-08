@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#101a2b">
+    <title>SepsisPulse | Research prototype</title>
+    <style>
+      :root {
+        color-scheme: dark;
+        --bg: #0b1220;
+        --panel: #121e30;
+        --panel-soft: #17263a;
+        --line: #263851;
+        --text: #eef4fb;
+        --muted: #9cafc4;
+        --teal: #59d8c5;
+        --blue: #7cb6ff;
+        --amber: #ffc46b;
+        --red: #ff7d86;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        background: radial-gradient(ellipse at 20% -10%, #1b3150 0, var(--bg) 45%);
+        color: var(--text);
+        font: 15px/1.5 ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+      }
+      button, input, textarea { font: inherit; }
+      .shell { max-width: 1180px; margin: 0 auto; padding: 28px 22px 56px; }
+      header { display: flex; justify-content: space-between; gap: 24px; align-items: center; }
+      .brand { display: flex; gap: 13px; align-items: center; }
+      .mark {
+        width: 42px; height: 42px; display: grid; place-items: center; border-radius: 13px;
+        background: linear-gradient(145deg, #2a817b, #244a71); color: white; font-size: 22px;
+      }
+      h1 { font-size: 22px; line-height: 1.15; margin: 0; letter-spacing: -.02em; }
+      .subbrand { color: var(--muted); font-size: 12px; margin-top: 3px; }
+      .prototype-tag {
+        color: var(--teal); background: #12342f; border: 1px solid #235b53;
+        border-radius: 99px; padding: 6px 11px; font-size: 12px; white-space: nowrap;
+      }
+      .disclaimer {
+        margin: 24px 0; padding: 12px 15px; border: 1px solid #7d5a2a;
+        border-radius: 10px; background: #352817; color: #ffdda6; font-weight: 650;
+      }
+      .layout { display: grid; grid-template-columns: minmax(300px, .85fr) minmax(0, 1.4fr); gap: 18px; }
+      .panel {
+        border: 1px solid var(--line); background: rgba(18, 30, 48, .94);
+        border-radius: 15px; padding: 19px; box-shadow: 0 12px 34px #050a1280;
+      }
+      .panel h2 { font-size: 16px; margin: 0 0 4px; }
+      .hint { color: var(--muted); font-size: 13px; margin: 0 0 16px; }
+      label { display: block; color: #dbe6f2; font-size: 13px; font-weight: 600; margin: 15px 0 6px; }
+      input[type="text"], input[type="file"], textarea {
+        width: 100%; background: #0c1625; border: 1px solid #344861; color: var(--text);
+        border-radius: 8px; padding: 10px 11px;
+      }
+      input[type="file"] { padding: 8px; font-size: 12px; }
+      textarea { min-height: 150px; resize: vertical; font: 12px/1.5 ui-monospace, Consolas, monospace; }
+      input:focus, textarea:focus { outline: 2px solid #4eafa5; outline-offset: 1px; }
+      button {
+        width: 100%; margin-top: 17px; border: 0; border-radius: 9px; padding: 11px 14px;
+        color: #071d1d; background: var(--teal); font-weight: 750; cursor: pointer;
+      }
+      button:hover { background: #7ce8d7; }
+      button:disabled { opacity: .55; cursor: wait; }
+      .privacy { color: var(--muted); font-size: 11px; margin: 12px 0 0; }
+      .or { display: flex; align-items: center; gap: 10px; color: #73879f; font-size: 11px; margin: 14px 0; }
+      .or::before, .or::after { content: ""; height: 1px; flex: 1; background: var(--line); }
+      .status { margin: 14px 0 0; color: var(--muted); font-size: 12px; }
+      .status.error { color: #ff9ca3; }
+      .results { display: grid; gap: 18px; }
+      .result-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; }
+      .patient { color: var(--muted); font-size: 12px; }
+      .patient strong { display: block; font-size: 16px; color: var(--text); margin-top: 2px; }
+      .score-wrap { text-align: right; }
+      .score { color: var(--teal); font-size: 35px; font-weight: 760; line-height: 1; letter-spacing: -.04em; }
+      .score.high { color: var(--red); }
+      .score-caption { color: var(--muted); font-size: 11px; margin-top: 5px; }
+      .pills { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 15px; }
+      .pill { background: var(--panel-soft); border: 1px solid var(--line); padding: 4px 9px; border-radius: 99px; font-size: 11px; }
+      .pill.risk-high { color: #ffadb2; border-color: #713c46; background: #351e2b; }
+      .pill.risk-low, .pill.confidence-high { color: #a4d8ce; border-color: #28564f; background: #15332f; }
+      .pill.confidence-low { color: #ffdda6; border-color: #7d5a2a; background: #352817; }
+      .alert { margin-top: 14px; padding: 10px 12px; border-left: 3px solid var(--amber); background: #30291e; color: #ffdda6; font-size: 13px; }
+      .alert.high-risk { border-color: var(--red); background: #351e2b; color: #ffadb2; }
+      .section-title { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; margin: 0 0 12px; }
+      .section-title h2 { margin: 0; }
+      .section-title span { color: var(--muted); font-size: 11px; }
+      .chart-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+      .chart {
+        background: #0e1929; border: 1px solid #23364d; border-radius: 10px; padding: 9px 10px 5px;
+        min-width: 0;
+      }
+      .chart-title { font-size: 11px; color: #c7d4e2; }
+      .chart svg { width: 100%; height: 62px; display: block; overflow: visible; }
+      .chart polyline { fill: none; stroke: var(--blue); stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+      .chart circle { fill: var(--teal); stroke: #0e1929; stroke-width: 2; }
+      .contrib-list { display: grid; gap: 8px; }
+      .contrib { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; align-items: center; }
+      .contrib-name { overflow-wrap: anywhere; font: 11px ui-monospace, Consolas, monospace; color: #cbd7e5; }
+      .contrib-track { grid-column: 1 / -1; height: 4px; background: #26364a; border-radius: 4px; overflow: hidden; }
+      .contrib-bar { height: 100%; background: var(--teal); }
+      .contrib-bar.negative { background: var(--blue); margin-left: auto; }
+      .contrib-value { font: 11px ui-monospace, Consolas, monospace; color: var(--muted); }
+      .explain-note { color: var(--muted); font-size: 11px; margin: 13px 0 0; }
+      .missing-list { display: flex; flex-wrap: wrap; gap: 6px; }
+      .missing-item { border: 1px solid #33445a; background: #0e1929; padding: 3px 7px; border-radius: 6px; font-size: 10px; color: #bbc9d8; }
+      .empty {
+        min-height: 370px; display: grid; place-items: center; text-align: center;
+        border: 1px dashed #344861; border-radius: 15px; padding: 28px; color: var(--muted);
+      }
+      .empty strong { display: block; color: #dbe6f2; font-size: 16px; margin-bottom: 5px; }
+      .hidden { display: none !important; }
+      footer { margin-top: 20px; color: #8295aa; font-size: 11px; text-align: center; }
+      @media (max-width: 820px) {
+        .layout { grid-template-columns: 1fr; }
+        header { align-items: flex-start; }
+      }
+      @media (max-width: 500px) {
+        .shell { padding: 20px 13px 38px; }
+        .prototype-tag { font-size: 10px; white-space: normal; text-align: center; }
+        .chart-grid { grid-template-columns: 1fr; }
+        .panel { padding: 15px; }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <header>
+        <div class="brand">
+          <div class="mark" aria-hidden="true">+</div>
+          <div>
+            <h1>SepsisPulse</h1>
+            <div class="subbrand">Six-hour early-warning research prototype</div>
+          </div>
+        </div>
+        <div class="prototype-tag">Academic research prototype</div>
+      </header>
+
+      <div class="disclaimer" role="note">
+        Research/Clinical Decision-Support Prototype — Not for Medical Diagnosis.
+      </div>
+
+      <div class="layout">
+        <section class="panel" aria-labelledby="input-title">
+          <h2 id="input-title">Patient data</h2>
+          <p class="hint">Provide hourly ICU observations for the preceding six-hour window. The model estimates whether the dataset's sepsis label may first become positive during the next six hours; that label is not necessarily a clinical onset time.</p>
+          <form id="prediction-form">
+            <label for="patient-id">Patient ID</label>
+            <input id="patient-id" name="patient_id" type="text" maxlength="128" required autocomplete="off">
+            <label for="patient-file">Upload PSV file</label>
+            <input id="patient-file" name="file" type="file" accept=".psv,text/plain">
+            <div class="or">OR ENTER HOURLY RECORDS AS JSON</div>
+            <label for="records">Hourly records</label>
+            <textarea id="records" spellcheck="false" placeholder="Paste a JSON array of at least six hourly records. Each record must include ICULOS and may include observed clinical columns."></textarea>
+            <p class="privacy">Observed column names: ICULOS, HR, O2Sat, Temp, SBP, MAP, DBP, Resp, EtCO2, BaseExcess, HCO3, FiO2, pH, PaCO2, SaO2, AST, BUN, Alkalinephos, Calcium, Chloride, Creatinine, Bilirubin_direct, Glucose, Lactate, Magnesium, Phosphate, Potassium, Bilirubin_total, TroponinI, Hct, Hgb, PTT, WBC, Fibrinogen, Platelets, Age, Gender, Unit1, Unit2, HospAdmTime.</p>
+            <button id="submit-button" type="submit">Assess six-hour window</button>
+          </form>
+          <p class="privacy">Use only authorized, de-identified research data. Input is sent to the server, processed in memory, and not saved by this application. Never submit identifiable or protected health information.</p>
+          <p id="model-status" class="status" role="status">Checking model status…</p>
+          <p id="form-status" class="status" role="alert"></p>
+        </section>
+
+        <section id="result" class="results hidden" aria-live="polite">
+          <article class="panel">
+            <div class="result-head">
+              <div class="patient">Patient ID<strong id="patient-result">—</strong></div>
+              <div class="score-wrap">
+                <div id="risk-score" class="score">—</div>
+                <div id="risk-caption" class="score-caption">Platt-calibrated forecast risk</div>
+              </div>
+            </div>
+            <div class="pills">
+              <span id="risk-pill" class="pill">Risk —</span>
+              <span id="confidence-pill" class="pill">Confidence —</span>
+              <span id="time-pill" class="pill">ICU hour —</span>
+            </div>
+            <div id="alert-status" class="alert"></div>
+          </article>
+
+          <article class="panel">
+            <div class="section-title">
+              <h2>Recent vital and lab trends</h2>
+              <span>Observed values only · last six hourly records</span>
+            </div>
+            <div id="trend-charts" class="chart-grid"></div>
+          </article>
+
+          <article class="panel">
+            <div class="section-title">
+              <h2>Top contributing features</h2>
+              <span>Ranked by absolute SHAP value</span>
+            </div>
+            <div id="contributors" class="contrib-list"></div>
+            <p id="explanation-note" class="explain-note"></p>
+          </article>
+
+          <article class="panel">
+            <div class="section-title">
+              <h2>Missing-data summary</h2>
+              <span>Fraction missing in the six-hour window</span>
+            </div>
+            <div id="missing-list" class="missing-list"></div>
+          </article>
+        </section>
+
+        <section id="empty-state" class="empty">
+          <div>
+            <strong>Waiting for patient data</strong>
+            Risk, confidence, trends, and explanations will appear after an assessment.
+            The application does not provide a diagnosis.
+          </div>
+        </section>
+      </div>
+      <footer>Research prototype only. Model outputs are not clinical advice and require independent professional review.</footer>
+    </main>
+
+    <script>
+      const form = document.getElementById("prediction-form");
+      const button = document.getElementById("submit-button");
+      const formStatus = document.getElementById("form-status");
+      const modelStatus = document.getElementById("model-status");
+      const trendNames = ["HR", "O2Sat", "Temp", "SBP", "MAP", "DBP", "Resp", "EtCO2", "WBC", "Lactate", "Platelets", "Creatinine"];
+
+      async function checkModel() {
+        try {
+          const response = await fetch("/health");
+          let health;
+          try { health = await response.json(); }
+          catch { throw new Error("Health endpoint did not return JSON. Open the dashboard from the running SepsisPulse server."); }
+          if (!response.ok || health.model_status !== "ready") {
+            modelStatus.textContent = `Model unavailable: ${health.detail || "Train a model artifact before making predictions."}`;
+            modelStatus.classList.add("error");
+            return;
+          }
+          modelStatus.textContent = `Model ready · ${health.window_hours}-hour input · ${health.prediction_horizon_hours}-hour forecast · ${health.feature_version}`;
+        } catch (error) {
+          modelStatus.textContent = `Could not check model status: ${error.message}`;
+          modelStatus.classList.add("error");
+        }
+      }
+
+      function addText(parent, tag, text, className) {
+        const element = document.createElement(tag);
+        element.textContent = text;
+        if (className) element.className = className;
+        parent.appendChild(element);
+        return element;
+      }
+
+      function renderTrends(trends) {
+        const container = document.getElementById("trend-charts");
+        container.replaceChildren();
+        for (const name of trendNames) {
+          const values = trends[name] || [];
+          if (!values.some(value => value !== null)) continue;
+          const card = document.createElement("div");
+          card.className = "chart";
+          addText(card, "div", name, "chart-title");
+          const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+          svg.setAttribute("viewBox", "0 0 240 62");
+          svg.setAttribute("role", "img");
+          svg.setAttribute("aria-label", `${name} trend over the six-hour window`);
+          const present = values.filter(value => value !== null);
+          const min = Math.min(...present);
+          const max = Math.max(...present);
+          const spread = max - min || 1;
+          let segment = [];
+          const segments = [];
+          values.forEach((value, index) => {
+            if (value === null) {
+              if (segment.length) segments.push(segment);
+              segment = [];
+              return;
+            }
+            const x = 8 + index * (224 / Math.max(values.length - 1, 1));
+            const y = 49 - ((value - min) / spread) * 38;
+            segment.push(`${x},${y}`);
+            const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+            circle.setAttribute("cx", String(x));
+            circle.setAttribute("cy", String(y));
+            circle.setAttribute("r", "3");
+            svg.appendChild(circle);
+          });
+          if (segment.length) segments.push(segment);
+          for (const points of segments) {
+            if (points.length < 2) continue;
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
+            line.setAttribute("points", points.join(" "));
+            svg.insertBefore(line, svg.firstChild);
+          }
+          card.appendChild(svg);
+          container.appendChild(card);
+        }
+        if (!container.children.length) addText(container, "p", "No trend measurements are available in the submitted window.", "hint");
+      }
+
+      function renderContributors(contributors) {
+        const container = document.getElementById("contributors");
+        container.replaceChildren();
+        const max = Math.max(...contributors.map(item => Math.abs(item.shap_value)), 1e-9);
+        for (const item of contributors) {
+          const row = document.createElement("div");
+          row.className = "contrib";
+          addText(row, "span", item.feature, "contrib-name");
+          addText(row, "span", `${item.shap_value >= 0 ? "+" : ""}${item.shap_value.toFixed(3)}`, "contrib-value");
+          const track = document.createElement("div");
+          track.className = "contrib-track";
+          const bar = document.createElement("div");
+          bar.className = `contrib-bar${item.shap_value < 0 ? " negative" : ""}`;
+          bar.style.width = `${Math.max(2, Math.abs(item.shap_value) / max * 100)}%`;
+          track.appendChild(bar);
+          row.appendChild(track);
+          container.appendChild(row);
+        }
+      }
+
+      function renderMissingness(missingness) {
+        const container = document.getElementById("missing-list");
+        container.replaceChildren();
+        const entries = Object.entries(missingness).filter(([, value]) => value > 0);
+        entries.sort((a, b) => b[1] - a[1]);
+        if (!entries.length) {
+          addText(container, "span", "No missing measurements in this window.", "missing-item");
+          return;
+        }
+        for (const [name, fraction] of entries) {
+          addText(container, "span", `${name}: ${(fraction * 100).toFixed(0)}% missing`, "missing-item");
+        }
+      }
+
+      function renderResult(data) {
+        document.getElementById("empty-state").classList.add("hidden");
+        document.getElementById("result").classList.remove("hidden");
+        document.getElementById("patient-result").textContent = data.patient_id;
+        const score = document.getElementById("risk-score");
+        score.textContent = `${data.risk_percent.toFixed(1)}%`;
+        score.classList.toggle("high", data.risk_category === "high");
+        document.getElementById("risk-caption").textContent = `Calibrated risk of first positive sepsis label within ${data.prediction_horizon_hours} hours`;
+        const riskPill = document.getElementById("risk-pill");
+        riskPill.textContent = `Risk ${data.risk_category}`;
+        riskPill.className = `pill risk-${data.risk_category}`;
+        const confidencePill = document.getElementById("confidence-pill");
+        confidencePill.textContent = `Confidence ${data.confidence_level} · ${(data.confidence_score * 100).toFixed(0)}%`;
+        confidencePill.className = `pill confidence-${data.confidence_level}`;
+        document.getElementById("time-pill").textContent = `ICU hour ${data.prediction_time_iculos}`;
+        const alert = document.getElementById("alert-status");
+        alert.textContent = data.alert_status;
+        alert.classList.toggle("high-risk", data.risk_category === "high");
+        document.getElementById("explanation-note").textContent = `${data.explanation_scale} Confidence is heuristic: ${data.confidence_method}`;
+        renderTrends(data.trends);
+        renderContributors(data.top_contributors);
+        renderMissingness(data.missingness);
+      }
+
+      form.addEventListener("submit", async event => {
+        event.preventDefault();
+        formStatus.textContent = "";
+        formStatus.classList.remove("error");
+        const patientId = document.getElementById("patient-id").value.trim();
+        const file = document.getElementById("patient-file").files[0];
+        const rawRecords = document.getElementById("records").value.trim();
+        if (!file && !rawRecords) {
+          formStatus.textContent = "Upload a PSV file or enter hourly JSON records.";
+          formStatus.classList.add("error");
+          return;
+        }
+        button.disabled = true;
+        button.textContent = "Assessing…";
+        try {
+          let response;
+          if (file) {
+            const payload = new FormData();
+            payload.append("file", file);
+            payload.append("patient_id", patientId);
+            response = await fetch("/api/predict", { method: "POST", body: payload });
+          } else {
+            let parsed;
+            try { parsed = JSON.parse(rawRecords); }
+            catch (error) { throw new Error(`Invalid JSON: ${error.message}`); }
+            const records = Array.isArray(parsed) ? parsed : parsed.records;
+            const requestPatientId = Array.isArray(parsed) ? patientId : (parsed.patient_id || patientId);
+            response = await fetch("/api/predict/json", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ patient_id: requestPatientId, records })
+            });
+          }
+          const result = await response.json();
+          if (!response.ok) throw new Error(result.detail || `Request failed (${response.status}).`);
+          renderResult(result);
+        } catch (error) {
+          formStatus.textContent = error.message;
+          formStatus.classList.add("error");
+        } finally {
+          button.disabled = false;
+          button.textContent = "Assess six-hour window";
+        }
+      });
+
+      checkModel();
+    </script>
+  </body>
+</html>

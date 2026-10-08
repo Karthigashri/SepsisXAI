@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: sepsispulse
+    runtime: python
+    plan: free
+    buildCommand: python -m pip install . && python scripts/fetch_model.py
+    startCommand: uvicorn sepsispulse.api:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      - key: SEPSISPULSE_MODEL_PATH
+        value: artifacts/sepsispulse.joblib
+      - key: SEPSISPULSE_MODEL_URL
+        sync: false
+      - key: SEPSISPULSE_MODEL_SHA256
+        sync: false
