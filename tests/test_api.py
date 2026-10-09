@@ -39,3 +39,7 @@ def test_dashboard_includes_required_research_disclaimer(
             "Research/Clinical Decision-Support Prototype — Not for Medical Diagnosis."
             in response.text
         )
+        assert 'id="risk-detail"' in response.text
+        assert "Calibrated probability:" in response.text
+        assert "Alert threshold:" in response.text
+        assert "confidence_score" in response.text

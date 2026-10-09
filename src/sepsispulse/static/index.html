@@ -78,6 +78,7 @@
       .score { color: var(--teal); font-size: 35px; font-weight: 760; line-height: 1; letter-spacing: -.04em; }
       .score.high { color: var(--red); }
       .score-caption { color: var(--muted); font-size: 11px; margin-top: 5px; }
+      .score-detail { color: #c2d0df; font-size: 11px; margin-top: 4px; }
       .pills { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 15px; }
       .pill { background: var(--panel-soft); border: 1px solid var(--line); padding: 4px 9px; border-radius: 99px; font-size: 11px; }
       .pill.risk-high { color: #ffadb2; border-color: #713c46; background: #351e2b; }
@@ -170,6 +171,7 @@
               <div class="score-wrap">
                 <div id="risk-score" class="score">—</div>
                 <div id="risk-caption" class="score-caption">Platt-calibrated forecast risk</div>
+                <div id="risk-detail" class="score-detail">Calibrated probability: — · Alert threshold: —</div>
               </div>
             </div>
             <div class="pills">
@@ -339,11 +341,12 @@
         score.textContent = `${data.risk_percent.toFixed(1)}%`;
         score.classList.toggle("high", data.risk_category === "high");
         document.getElementById("risk-caption").textContent = `Calibrated risk of first positive sepsis label within ${data.prediction_horizon_hours} hours`;
+        document.getElementById("risk-detail").textContent = `Calibrated probability: ${(data.risk_probability * 100).toFixed(3)}% · Alert threshold: ${(data.threshold * 100).toFixed(3)}%`;
         const riskPill = document.getElementById("risk-pill");
         riskPill.textContent = `Risk ${data.risk_category}`;
         riskPill.className = `pill risk-${data.risk_category}`;
         const confidencePill = document.getElementById("confidence-pill");
-        confidencePill.textContent = `Confidence ${data.confidence_level} · ${(data.confidence_score * 100).toFixed(0)}%`;
+        confidencePill.textContent = `Confidence ${data.confidence_level} · ${(data.confidence_score * 100).toFixed(2)}%`;
         confidencePill.className = `pill confidence-${data.confidence_level}`;
         document.getElementById("time-pill").textContent = `ICU hour ${data.prediction_time_iculos}`;
         const alert = document.getElementById("alert-status");
